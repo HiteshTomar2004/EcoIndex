@@ -1,0 +1,21 @@
+# Render deployment config for the EcoScout backend.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: ecoscout-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GOOGLE_API_KEY
+        sync: false          # set in Render dashboard (secret)
+      - key: TAVILY_API_KEY
+        sync: false          # set in Render dashboard (secret)
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+      - key: MAX_SEARCH_RESULTS
+        value: "4"
+      - key: ALLOWED_ORIGINS
+        sync: false          # set to your Vercel URL
