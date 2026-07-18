@@ -75,6 +75,31 @@ export default function App() {
           <SearchBar onSubmit={handleAnalyze} loading={loading} />
         </section>
 
+        {!started && (
+          <div className="mx-auto mt-6 max-w-3xl animate-floatUp rounded-organic border border-sun/40 bg-sun/10 p-4 shadow-paper backdrop-blur">
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">
+                ⏳
+              </span>
+              <div className="text-sm leading-relaxed text-deep/85">
+                <p className="font-bold text-forest">Heads up — this is a free-tier demo</p>
+                <ul className="mt-1.5 space-y-1">
+                  <li>
+                    <span className="font-semibold">First request may take ~90s.</span>{" "}
+                    The backend sleeps when idle (Render free tier) and needs a
+                    moment to wake up. After that it's fast.
+                  </li>
+                  <li>
+                    <span className="font-semibold">Please don't spam analyses.</span>{" "}
+                    Each one uses the Gemini free-tier quota — rapid repeats can
+                    hit the daily rate limit and take the demo offline for a day.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="mx-auto mt-6 max-w-3xl rounded-organic border border-[#b85137]/25 bg-white/95 p-4 text-center shadow-paper">
             <p className="font-bold text-[#c0532f]">{error}</p>
