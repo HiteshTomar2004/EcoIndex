@@ -12,6 +12,7 @@ export default function App() {
   const [events, setEvents] = useState([]);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(null);
   const [error, setError] = useState(null);
   const abortRef = useRef(null);
 
@@ -23,18 +24,22 @@ export default function App() {
     setEvents([]);
     setResult(null);
     setError(null);
+    setStatus(null);
     setLoading(true);
 
     await analyzeStream(
       product,
       {
         onActivity: (a) => setEvents((prev) => [...prev, a]),
+        onStatus: (msg) => setStatus(msg),
         onResult: (r) => {
           setResult(r);
+          setStatus(null);
           setLoading(false);
         },
         onError: (msg) => {
           setError(msg);
+          setStatus(null);
           setLoading(false);
         },
       },
@@ -76,6 +81,15 @@ export default function App() {
             <p className="mt-1 text-sm text-deep/70">
               Make sure the backend is running and your API keys are set.
             </p>
+          </div>
+        )}
+
+        {status && !error && (
+          <div className="mx-auto mt-6 max-w-3xl animate-floatUp rounded-organic border border-forest/15 bg-white/90 p-4 text-center shadow-paper backdrop-blur">
+            <div className="flex items-center justify-center gap-3">
+              <span className="h-3 w-3 animate-pulseSoft rounded-full bg-leaf" />
+              <p className="font-semibold text-forest">{status}</p>
+            </div>
           </div>
         )}
 
