@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import os
 from typing import List, Tuple
+from urllib.parse import urlparse, unquote
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from tavily import TavilyClient
@@ -179,9 +180,36 @@ and an approximate score. Choose a one-word verdict: Excellent | Good | Mixed | 
 # --------------------------------------------------------------------------- #
 # Agent functions (structured output via Gemini)
 # --------------------------------------------------------------------------- #
+def clean_product_input(product: str) -> str:
+    """Strip tracking cruft from a pasted URL so intake sees a clean signal.
+
+    Shopping URLs (Amazon, etc.) carry hundreds of chars of tracking params
+    (?crid=, &dib=, &sr=, ...) that add noise and bloat. When the input is a
+    URL, we keep the scheme + host + path (the path usually contains the
+    product name and slug) and drop the query string entirely. Non-URL input
+    is returned unchanged. The intake LLM then extracts the product from the
+    readable path segments.
+    """
+    text = product.strip()
+    if not text.lower().startswith(("http://", "https://")):
+        return text
+
+    try:
+        parsed = urlparse(text)
+    except ValueError:
+        return text[:500]
+
+    # Human-readable slug lives in the path; decode %20 etc. for the LLM.
+    path = unquote(parsed.path).replace("-", " ").replace("/", " ").strip()
+    host = parsed.netloc
+    cleaned = f"{host} {path}".strip()
+    # Guard against pathological paths.
+    return cleaned[:500] if cleaned else text[:500]
+
+
 async def run_intake(product: str) -> NormalizedProduct:
     llm = get_llm().with_structured_output(NormalizedProduct)
-    prompt = INTAKE_PROMPT.format(product=product)
+    prompt = INTAKE_PROMPT.format(product=clean_product_input(product))
     return await llm.ainvoke(prompt)
 
 

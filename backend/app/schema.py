@@ -24,7 +24,7 @@ class AnalyzeRequest(BaseModel):
     product: str = Field(
         ...,
         min_length=2,
-        max_length=500,
+        max_length=2000,
         description="Product name, description, or URL to analyze.",
     )
 
